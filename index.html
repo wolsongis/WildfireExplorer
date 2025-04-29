@@ -1,1 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WildfireWatch - Live Fire Data</title>
 
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+  <!-- Map Styling -->
+  <style>
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Map container -->
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+  <!-- Esri-Leaflet JS (allows FeatureServer connections) -->
+  <script src="https://unpkg.com/esri-leaflet@3.0.4/dist/esri-leaflet.js"></script>
+
+  <script>
+  // Initialize the map
+  var map = L.map('map').setView([37.7749, -122.4194], 6);  // Default center, zoomed out on the US
+
+  // Add OpenStreetMap base tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  // Connect to the Fire Perimeter FeatureServer
+  var fireLayer = L.esri.featureLayer({
+    url: "https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/Fire_Perimeter_History_Since_2000/FeatureServer/0",
+    style: function (feature) {
+      return {
+        color: "red",
+        weight: 1,
+        fillColor: "orange",
+        fillOpacity: 0.3
+      };
+    },
+    onEachFeature: function (feature, layer) {
+      if (feature.properties) {
+        layer.bindPopup(
+          "<strong>Fire Year:</strong> " + feature.properties.FIRE_YEAR +
+          "<br><strong>Agency:</strong> " + feature.properties.AGENCY +
+          "<br><strong>Acres:</strong> " + feature.properties.GIS_ACRES.toFixed(2)
+        );
+      }
+    }
+  }).addTo(map);
+  </script>
+
+</body>
+</html>
