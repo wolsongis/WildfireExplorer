@@ -1,54 +1,64 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Wildfire Perimeters Since 2000 (Over 100 Acres)</title>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WildfireWatch - Live Fire Data</title>
 
   <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <!-- Esri Leaflet CSS (optional) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+  <!-- Map Styling -->
   <style>
     #map {
       height: 100vh;
+      width: 100%;
     }
   </style>
 </head>
 <body>
 
-<div id="map"></div>
+  <!-- Map container -->
+  <div id="map"></div>
 
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<!-- Esri Leaflet plugin -->
-<script src="https://unpkg.com/esri-leaflet@3.0.11/dist/esri-leaflet.js"></script>
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
-<script>
-  // Initialize the map
-  const map = L.map('map').setView([37.5, -119], 6); // Adjust center/zoom as needed
+  <!-- Esri-Leaflet JS (allows FeatureServer connections) -->
+  <script src="https://unpkg.com/esri-leaflet@3.0.4/dist/esri-leaflet.js"></script>
 
-  // Add base layer
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap contributors'
-  }).addTo(map);
+  <script>
+    // Initialize the map
+    var map = L.map('map').setView([37.7749, -122.4194], 6);  // Default center, zoomed out on the US
 
-  // Add ArcGIS Feature Layer for wildfires since 2000 over 100 acres
-  const wildfireLayer = L.esri.featureLayer({
-    url: 'https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/Fire_Perimeter_History_Since_2000__over_100_acre/FeatureServer',
-    style: function () {
-      return { color: '#e25822', weight: 1 };
-    },
-    onEachFeature: function (feature, layer) {
-      const props = feature.properties;
-      layer.bindPopup(
-        `<strong>${props.FIRE_NAME || 'Unknown Fire'}</strong><br>` +
-        `Year: ${props.FIRE_YEAR}<br>` +
-        `Acres: ${props.GIS_ACRES.toLocaleString()}`
-      );
-    }
-  }).addTo(map);
-</script>
+    // Add OpenStreetMap base tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Connect to the Fire Perimeter FeatureServer
+    var fireLayer = L.esri.featureLayer({
+      url: "https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/Fire_Perimeter_History_Since_2000__over_100_acre/FeatureServer",
+      style: function (feature) {
+        return {
+          color: "red",
+          weight: 1,
+          fillColor: "orange",
+          fillOpacity: 0.3
+        };
+      },
+      onEachFeature: function (feature, layer) {
+        if (feature.properties) {
+          layer.bindPopup(
+            "<strong>Fire Year:</strong> " + feature.properties.FIRE_YEAR +
+            "<br><strong>Fire Name:</strong> " + feature.properties.FIRE_NAME +
+            "<br><strong>Acres:</strong> " + feature.properties.GIS_ACRES.toFixed(2)
+          );
+        }
+      }
+    }).addTo(map);
+
+  </script>
 
 </body>
 </html>
