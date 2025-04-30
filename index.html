@@ -21,6 +21,19 @@
   <!-- Map container -->
   <div id="map"></div>
 
+  <!-- Year range filter sliders -->
+  <div style="position: absolute; top: 10px; left: 10px; z-index: 1000; background: white; padding: 10px; border-radius: 5px;">
+    <label for="minYearSlider"><strong>Filter by Year Range:</strong></label>
+    <br>
+    <label for="minYearSlider">From:</label>
+    <input type="range" id="minYearSlider" min="2000" max="2025" value="2000" step="1" />
+    <span id="minYearValue">2000</span>
+    <br>
+    <label for="maxYearSlider">To:</label>
+    <input type="range" id="maxYearSlider" min="2000" max="2025" value="2025" step="1" />
+    <span id="maxYearValue">2025</span>
+  </div>
+
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 
@@ -55,8 +68,40 @@
           "<br><strong>Acres:</strong> " + feature.properties.GIS_ACRES.toFixed(2)
         );
       }
+    },
+    // Filter fires by year range and acreage
+    filter: function (feature) {
+      var fireYear = feature.properties.FIRE_YEAR;
+      var fireAcres = feature.properties.GIS_ACRES;
+      return fireYear >= 2000 && fireYear <= 2025 && fireAcres >= 200; // Default range with acreage filter
     }
   }).addTo(map);
+
+  // Update the map when the sliders' values change
+  var minYearSlider = document.getElementById('minYearSlider');
+  var maxYearSlider = document.getElementById('maxYearSlider');
+  var minYearValue = document.getElementById('minYearValue');
+  var maxYearValue = document.getElementById('maxYearValue');
+
+  function updateFilter() {
+    var minYear = parseInt(minYearSlider.value);
+    var maxYear = parseInt(maxYearSlider.value);
+
+    // Ensure minYear is not greater than maxYear
+    if (minYear > maxYear) {
+      minYearSlider.value = maxYear;
+      minYear = maxYear;
+    }
+
+    minYearValue.textContent = minYear;
+    maxYearValue.textContent = maxYear;
+
+    // Update the fireLayer filter with acreage condition
+    fireLayer.setWhere("FIRE_YEAR >= " + minYear + " AND FIRE_YEAR <= " + maxYear + " AND GIS_ACRES >= 200");
+  }
+
+  minYearSlider.addEventListener('input', updateFilter);
+  maxYearSlider.addEventListener('input', updateFilter);
   </script>
 
 </body>
