@@ -36,8 +36,9 @@
         require([
             "esri/Map",
             "esri/views/MapView",
-            "esri/layers/FeatureLayer"
-        ], function(Map, MapView, FeatureLayer) {
+            "esri/layers/FeatureLayer",
+            "esri/widgets/Slider"
+        ], function(Map, MapView, FeatureLayer, Slider) {
 
             // Create the map
             const map = new Map({
@@ -69,12 +70,38 @@
             // Add the layer to the map
             map.add(fireHistoryLayer);
 
+            // Add a slider widget to filter by year
+            const yearSlider = new Slider({
+                container: "sliderDiv",
+                min: 2000, // Adjust based on your data range
+                max: 2025, // Adjust based on your data range
+                values: [2000, 2025],
+                steps: 1,
+                labelsVisible: true,
+                labelFormatFunction: (value) => `Year: ${value}`
+            });
+
+            // Add a label to display the selected year range
+            const yearLabel = document.createElement("div");
+            yearLabel.id = "yearLabel";
+            yearLabel.style.textAlign = "center";
+            yearLabel.style.marginTop = "10px";
+            yearLabel.innerHTML = `Selected Years: ${yearSlider.values[0]} - ${yearSlider.values[1]}`;
+            document.getElementById("sliderDiv").appendChild(yearLabel);
+
+            // Update the layer's definitionExpression and year label when the slider changes
+            yearSlider.on("thumb-drag", (event) => {
+                const [minYear, maxYear] = yearSlider.values;
+                fireHistoryLayer.definitionExpression = `FIRE_YEAR >= ${minYear} AND FIRE_YEAR <= ${maxYear}`;
+                yearLabel.innerHTML = `Selected Years: ${minYear} - ${maxYear}`;
+            });
+
             // Add a simple event listener to make sure the view is ready before adding components
             view.when().then(() => {
-                 const arcgisMap = document.querySelector('arcgis-map');
-                 const zoom = document.createElement('arcgis-zoom');
-                 zoom.position = 'top-left';
-                 arcgisMap.appendChild(zoom);
+                const arcgisMap = document.querySelector('arcgis-map');
+                const zoom = document.createElement('arcgis-zoom');
+                zoom.position = 'top-left';
+                arcgisMap.appendChild(zoom);
             });
         });
     </script>
@@ -82,6 +109,7 @@
 </head>
 
 <body>
-    <div id="viewDiv" style="height: 100vh; width: 100vw;"></div>
+    <div id="viewDiv" style="height: 80vh; width: 100vw;"></div>
+    <div id="sliderDiv" style="height: 10vh; width: 100vw; padding: 10px;"></div>
 </body>
 </html>
