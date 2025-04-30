@@ -48,13 +48,22 @@
             const view = new MapView({
                 container: "viewDiv", // Make sure this matches the id of your arcgis-map element
                 map: map,
-                center: [-118.805, 34.027], // Initial center coordinates (Long, Lat)
-                zoom: 13                   // Initial zoom level
+                center: [-81.7, 29.2], // Center over Ocala National Forest (Long, Lat)
+                zoom: 10               // Zoomed out a bit more
             });
 
-            // Create the FeatureLayer for the fire history data
+            // Create the FeatureLayer for the fire history data with a popup template
             const fireHistoryLayer = new FeatureLayer({
-                url: "https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/fire_layer_history/FeatureServer"
+                url: "https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/fire_layer_history/FeatureServer",
+                popupTemplate: {
+                    title: "Fire Incident Details",
+                    content: `
+                        <b>Year:</b> {FIRE_YEAR}<br>
+                        <b>Acres Burned:</b> {GIS_ACRES}<br>
+                        <b>Incident:</b> {INCIDENT}<br>
+                        <b>Source:</b> {SOURCE}
+                    `
+                }
             });
 
             // Add the layer to the map
