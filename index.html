@@ -49,7 +49,7 @@
     attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
 
-  // Connect to the Fire Perimeter FeatureServer
+  // Connect to the new Fire Perimeter FeatureServer
   var fireLayer = L.esri.featureLayer({
     url: "https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/Fire_Perimeter_History_Since_2000__over_100_acre/FeatureServer",
     style: function (feature) {
@@ -69,11 +69,10 @@
         );
       }
     },
-    // Filter fires by year range and acreage
+    // Filter fires by year range
     filter: function (feature) {
       var fireYear = feature.properties.FIRE_YEAR;
-      var fireAcres = feature.properties.GIS_ACRES;
-      return fireYear >= 2000 && fireYear <= 2025 && fireAcres >= 200; // Default range with acreage filter
+      return fireYear >= 2000 && fireYear <= 2025; // Default range
     }
   }).addTo(map);
 
@@ -96,8 +95,8 @@
     minYearValue.textContent = minYear;
     maxYearValue.textContent = maxYear;
 
-    // Update the fireLayer filter with acreage condition
-    fireLayer.setWhere("FIRE_YEAR >= " + minYear + " AND FIRE_YEAR <= " + maxYear + " AND GIS_ACRES >= 200");
+    // Update the fireLayer filter
+    fireLayer.setWhere("FIRE_YEAR >= " + minYear + " AND FIRE_YEAR <= " + maxYear);
   }
 
   minYearSlider.addEventListener('input', updateFilter);
