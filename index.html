@@ -1,103 +1,54 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
+  <title>Wildfire Perimeters Since 2000 (Over 100 Acres)</title>
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WildfireWatch - Live Fire Data</title>
 
   <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-
-  <!-- Map Styling -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Esri Leaflet CSS (optional) -->
   <style>
     #map {
       height: 100vh;
-      width: 100%;
     }
   </style>
 </head>
 <body>
 
-  <!-- Map container -->
-  <div id="map"></div>
+<div id="map"></div>
 
-  <!-- Year range filter sliders -->
-  <div style="position: absolute; top: 10px; left: 10px; z-index: 1000; background: white; padding: 10px; border-radius: 5px;">
-    <label for="minYearSlider"><strong>Filter by Year Range:</strong></label>
-    <br>
-    <label for="minYearSlider">From:</label>
-    <input type="range" id="minYearSlider" min="2000" max="2025" value="2000" step="1" />
-    <span id="minYearValue">2000</span>
-    <br>
-    <label for="maxYearSlider">To:</label>
-    <input type="range" id="maxYearSlider" min="2000" max="2025" value="2025" step="1" />
-    <span id="maxYearValue">2025</span>
-  </div>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- Esri Leaflet plugin -->
+<script src="https://unpkg.com/esri-leaflet@3.0.11/dist/esri-leaflet.js"></script>
 
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-
-  <!-- Esri-Leaflet JS (allows FeatureServer connections) -->
-  <script src="https://unpkg.com/esri-leaflet@3.0.4/dist/esri-leaflet.js"></script>
-
-  <script>
+<script>
   // Initialize the map
-  var map = L.map('map').setView([37.7749, -122.4194], 6);  // Default center, zoomed out on the US
+  const map = L.map('map').setView([37.5, -119], 6); // Adjust center/zoom as needed
 
-  // Add OpenStreetMap base tiles
+  // Add base layer
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
+    maxZoom: 19,
+    attribution: '© OpenStreetMap contributors'
   }).addTo(map);
 
-  // Connect to the new Fire Perimeter FeatureServer
-  var fireLayer = L.esri.featureLayer({
-    url: "https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/Fire_Perimeter_History_Since_2000__over_100_acre/FeatureServer",
-    token: "AAPTxy8BH1VEsoebNVZXo8HurNAUgv3aeRUmzJ4ckMevLQLfVJhdc-z1-a5rmBvbZM6HiAtWhTkHR1uPqL3lwJdP49LWHB6rjySi-OGZeNP1ea6oiztHSf22dFyO6r4o94L1an9zLTOBsN3vlqSz7k8MyUO9e1udJ3zNViSQ518xOFVwCnGBfyh40rSb4E2X3zsumGVzsUowRjXGPUi8Odwr1Y9iVZinjPQa-7TSBIuR8E4.AT1_EtHHMprs", //
-    style: function (feature) {
-      return {
-        color: "red",
-        weight: 1,
-        fillColor: "orange",
-        fillOpacity: 0.3
-      };
+  // Add ArcGIS Feature Layer for wildfires since 2000 over 100 acres
+  const wildfireLayer = L.esri.featureLayer({
+    url: 'https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/Fire_Perimeter_History_Since_2000__over_100_acre/FeatureServer/0',
+    style: function () {
+      return { color: '#e25822', weight: 1 };
     },
     onEachFeature: function (feature, layer) {
-      if (feature.properties) {
-        layer.bindPopup(
-          "<strong>Fire Year:</strong> " + feature.properties.FIRE_YEAR +
-          "<br><strong>Agency:</strong> " + feature.properties.AGENCY +
-          "<br><strong>Acres:</strong> " + feature.properties.GIS_ACRES.toFixed(2)
-        );
-      }
+      const props = feature.properties;
+      layer.bindPopup(
+        `<strong>${props.FIRE_NAME || 'Unknown Fire'}</strong><br>` +
+        `Year: ${props.FIRE_YEAR}<br>` +
+        `Acres: ${props.GIS_ACRES.toLocaleString()}`
+      );
     }
   }).addTo(map);
-
-  // Update the map when the sliders' values change
-  var minYearSlider = document.getElementById('minYearSlider');
-  var maxYearSlider = document.getElementById('maxYearSlider');
-  var minYearValue = document.getElementById('minYearValue');
-  var maxYearValue = document.getElementById('maxYearValue');
-
-  function updateFilter() {
-    var minYear = parseInt(minYearSlider.value);
-    var maxYear = parseInt(maxYearSlider.value);
-
-    // Ensure minYear is not greater than maxYear
-    if (minYear > maxYear) {
-      minYearSlider.value = maxYear;
-      minYear = maxYear;
-    }
-
-    minYearValue.textContent = minYear;
-    maxYearValue.textContent = maxYear;
-
-    // Update the fireLayer filter
-    fireLayer.setWhere("FIRE_YEAR >= " + minYear + " AND FIRE_YEAR <= " + maxYear);
-  }
-
-  minYearSlider.addEventListener('input', updateFilter);
-  maxYearSlider.addEventListener('input', updateFilter);
-  </script>
+</script>
 
 </body>
 </html>
