@@ -1,64 +1,78 @@
 <!DOCTYPE html>
-<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WildfireWatch - Live Fire Data</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>ArcGIS Map with Fire History Layer</title>
 
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-
-  <!-- Map Styling -->
-  <style>
-    #map {
-      height: 100vh;
-      width: 100%;
-    }
-  </style>
-</head>
-<body>
-
-  <!-- Map container -->
-  <div id="map"></div>
-
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-
-  <!-- Esri-Leaflet JS (allows FeatureServer connections) -->
-  <script src="https://unpkg.com/esri-leaflet@3.0.4/dist/esri-leaflet.js"></script>
-
-  <script>
-    // Initialize the map
-    var map = L.map('map').setView([37.7749, -122.4194], 6);  // Default center, zoomed out on the US
-
-    // Add OpenStreetMap base tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    // Connect to the Fire Perimeter FeatureServer
-    var fireLayer = L.esri.featureLayer({
-      url: "https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/Fire_Perimeter_History_Since_2000__over_100_acre/FeatureServer",
-      style: function (feature) {
-        return {
-          color: "red",
-          weight: 1,
-          fillColor: "orange",
-          fillOpacity: 0.3
-        };
-      },
-      onEachFeature: function (feature, layer) {
-        if (feature.properties) {
-          layer.bindPopup(
-            "<strong>Fire Year:</strong> " + feature.properties.FIRE_YEAR +
-            "<br><strong>Fire Name:</strong> " + feature.properties.FIRE_NAME +
-            "<br><strong>Acres:</strong> " + feature.properties.GIS_ACRES.toFixed(2)
-          );
+    <style>
+        html,
+        body,
+        arcgis-map {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
         }
-      }
-    }).addTo(map);
+    </style>
 
-  </script>
+    <script>
+        var esriConfig = {
+            apiKey: "AAPTxy8BH1VEsoebNVZXo8HurNAUgv3aeRUmzJ4ckMevLQLfVJhdc-z1-a5rmBvbZM6HiAtWhTkHR1uPqL3lwJdP49LWHB6rjySi-OGZeNP1ea6oiztHSf22dFyO6r4o94L1an9zLTOBsN3vlqSz7k8MyUO9e1udJ3zNViSQ518xOFVwCnGBfyh40rSb4E2X3zsumGVzsUowRjXGPUi8Odwr1Y9iVZinjPQa-7TSBIuR8E4.AT1_EtHHMprs"
+        };
+    </script>
 
+    <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/2.13.2/calcite.css" />
+    <script type="module" src="https://js.arcgis.com/calcite-components/2.13.2/calcite.esm.js"></script>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.31/"></script>
+
+    <script
+        type="module"
+        src="https://js.arcgis.com/map-components/4.31/arcgis-map-components.esm.js"
+    ></script>
+
+    <script>
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/FeatureLayer"
+        ], function(Map, MapView, FeatureLayer) {
+
+            // Create the map
+            const map = new Map({
+                basemap: "arcgis/topographic" // You can change the basemap if desired
+            });
+
+            // Create the MapView
+            const view = new MapView({
+                container: "viewDiv", // Make sure this matches the id of your arcgis-map element
+                map: map,
+                center: [-118.805, 34.027], // Initial center coordinates (Long, Lat)
+                zoom: 13                   // Initial zoom level
+            });
+
+            // Create the FeatureLayer for the fire history data
+            const fireHistoryLayer = new FeatureLayer({
+                url: "https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/fire_layer_history/FeatureServer"
+            });
+
+            // Add the layer to the map
+            map.add(fireHistoryLayer);
+
+            // Add a simple event listener to make sure the view is ready before adding components
+            view.when().then(() => {
+                 const arcgisMap = document.querySelector('arcgis-map');
+                 const zoom = document.createElement('arcgis-zoom');
+                 zoom.position = 'top-left';
+                 arcgisMap.appendChild(zoom);
+            });
+        });
+    </script>
+
+</head>
+
+<body>
+    <div id="viewDiv" style="height: 100vh; width: 100vw;"></div>
 </body>
 </html>
