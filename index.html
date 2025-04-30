@@ -52,6 +52,7 @@
   // Connect to the new Fire Perimeter FeatureServer
   var fireLayer = L.esri.featureLayer({
     url: "https://services.arcgis.com/LBbVDC0hKPAnLRpO/arcgis/rest/services/Fire_Perimeter_History_Since_2000__over_100_acre/FeatureServer",
+    token: "AAPTxy8BH1VEsoebNVZXo8HurNAUgv3aeRUmzJ4ckMevLQLfVJhdc-z1-a5rmBvbZM6HiAtWhTkHR1uPqL3lwJdP49LWHB6rjySi-OGZeNP1ea6oiztHSf22dFyO6r4o94L1an9zLTOBsN3vlqSz7k8MyUO9e1udJ3zNViSQ518xOFVwCnGBfyh40rSb4E2X3zsumGVzsUowRjXGPUi8Odwr1Y9iVZinjPQa-7TSBIuR8E4.AT1_EtHHMprs", //
     style: function (feature) {
       return {
         color: "red",
@@ -68,11 +69,6 @@
           "<br><strong>Acres:</strong> " + feature.properties.GIS_ACRES.toFixed(2)
         );
       }
-    },
-    // Filter fires by year range
-    filter: function (feature) {
-      var fireYear = feature.properties.FIRE_YEAR;
-      return fireYear >= 2000 && fireYear <= 2025; // Default range
     }
   }).addTo(map);
 
